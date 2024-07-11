@@ -15,7 +15,7 @@ class membersignup(Resource):
         gender = data["gender"]
         email = data["email"]
         phone = data["phone"]
-        date_of_birth =data["date_of_birth"]
+        dob =data["dob"]
         password = data["password"]
         location_id = data["location_id"]
 
@@ -26,8 +26,8 @@ class membersignup(Resource):
             connection = pymysql.connect(host = 'localhost',  user ='root', password='', database ='bliss')
             cursor = connection.cursor()
             # insert into database
-            sql = "insert into members (surname, middle_name, others, gender, email, phone, date_of_birth, password, location_id) values(%s,%s,%s,%s,%s, %s,%s,%s,%s)"
-            data =(surname, middle_name, others, gender, email, phone, date_of_birth, hash_password(password), location_id)
+            sql = "insert into members (surname, middle_name, others, gender, email, phone, dob, password, location_id) values(%s,%s,%s,%s,%s, %s,%s,%s,%s)"
+            data =(surname, middle_name, others, gender, email, phone, dob, hash_password(password), location_id)
             cursor.execute(sql, data)
             connection.commit()
             return jsonify({"message" : " member saved succesfully"})
@@ -96,22 +96,31 @@ class makebooking(Resource):
         member_id = data["member_id"]
         test_id = data["test_id"]
         appointment_date = data["appointment_date"]
+        appointment_time =data["appointment_time"]
         latitude = data["latitude"]
         longitude = data["longitude"]
         status = data["status"]
-        invoice_number = data["invoice_number"]
+        invoice_no = data["invoice_no"]
 
         # connect to DB
         connection = pymysql.connect(host = 'localhost',  user ='root', password='', database ='bliss')
-        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        cursor = connection.cursor()
 
         # insert into database
-        sql = "insert into booking(member_id, test_id, appointment_date, latitude, longitude, status, invoice_number) values(%s,%s,%s,%s,%s, %s,%s)"
-        data = (member_id, test_id, appointment_date, latitude, longitude, status, invoice_number)
+        sql = "insert into booking(member_id, test_id, appointment_date, appointment_time, latitude, longitude, status, invoice_no) values(%s,%s,%s,%s,%s,%s,%s,%s)"
+        data = (member_id, test_id, appointment_date, appointment_time, latitude, longitude, status, invoice_no)
         cursor.execute(sql, data)
         connection.commit()
 
         return jsonify({ "message": "POST SUCCESSFUL. BOOKING COMPLETED"})
     
 
-    
+    # make payment
+class payment(Resource):
+    def post(self):
+        data = request.json
+        invoice_no = data['invoice_no']
+        amount = data['amount']
+        phone = data['phone']
+        stk_push (phone, amount, invoice_no)
+        return jsonify({"message": "Payment Successful"})
